@@ -9,7 +9,7 @@ from sklearn.linear_model import LogisticRegression
 
 
 # === Load data ===
-DATA_PATH = Path('alzheimers_disease_data.csv')
+DATA_PATH = Path('C:/Users/janaz/OneDrive/Desktop/Project/alzheimers_disease_data.csv')
 if not DATA_PATH.exists():
  raise FileNotFoundError("Make sure 'alzheimers_disease_data.csv' is present in the project root.")
 
