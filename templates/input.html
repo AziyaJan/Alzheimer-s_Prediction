@@ -1,0 +1,89 @@
+<!-- templates/input.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enter Inputs</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Enter Clinical & Lifestyle Features</h1>
+    {% if user_name %}<p class="muted">User: {{ user_name }}</p>{% endif %}
+
+    <form action="/predict" method="post" class="grid">
+      <div class="field"><label>Age</label><input name="Age" type="number" step="1" required></div>
+
+      <div class="field">
+        <label>Gender</label>
+        <select name="Gender" required>
+          <option value="0">Female (0)</option>
+          <option value="1">Male (1)</option>
+        </select>
+      </div>
+
+      <div class="field"><label>Ethnicity</label><input name="Ethnicity" type="number" step="1" required></div>
+      <div class="field"><label>Education Level</label><input name="EducationLevel" type="number" step="1" required></div>
+      <div class="field"><label>BMI</label><input name="BMI" type="number" step="0.01" required></div>
+
+      <div class="field">
+        <label>Smoking</label>
+        <select name="Smoking" required>
+          <option value="0">No (0)</option>
+          <option value="1">Yes (1)</option>
+        </select>
+      </div>
+
+      <div class="field"><label>Alcohol Consumption</label><input name="AlcoholConsumption" type="number" step="0.01" required></div>
+      <div class="field"><label>Physical Activity</label><input name="PhysicalActivity" type="number" step="0.01" required></div>
+      <div class="field"><label>Diet Quality</label><input name="DietQuality" type="number" step="0.01" required></div>
+      <div class="field"><label>Sleep Quality</label><input name="SleepQuality" type="number" step="0.01" required></div>
+
+      <div class="field"><label>Family History of Alzheimer’s</label><input name="FamilyHistoryAlzheimers" type="number" step="1" required></div>
+      <div class="field"><label>Cardiovascular Disease</label><input name="CardiovascularDisease" type="number" step="1" required></div>
+
+      <div class="field">
+        <label>Diabetes</label>
+        <select name="Diabetes" required>
+          <option value="0">No (0)</option>
+          <option value="1">Yes (1)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Depression</label>
+        <select name="Depression" required>
+          <option value="0">No (0)</option>
+          <option value="1">Yes (1)</option>
+        </select>
+      </div>
+
+      <div class="field"><label>Head Injury</label><input name="HeadInjury" type="number" step="1" required></div>
+      <div class="field"><label>Hypertension</label><input name="Hypertension" type="number" step="1" required></div>
+      <div class="field"><label>Systolic BP</label><input name="SystolicBP" type="number" step="1" required></div>
+      <div class="field"><label>Diastolic BP</label><input name="DiastolicBP" type="number" step="1" required></div>
+
+      <div class="field"><label>Total Cholesterol</label><input name="CholesterolTotal" type="number" step="0.01" required></div>
+      <div class="field"><label>LDL Cholesterol</label><input name="CholesterolLDL" type="number" step="0.01" required></div>
+      <div class="field"><label>HDL Cholesterol</label><input name="CholesterolHDL" type="number" step="0.01" required></div>
+      <div class="field"><label>Triglycerides</label><input name="CholesterolTriglycerides" type="number" step="0.01" required></div>
+
+      <div class="field"><label>MMSE</label><input name="MMSE" type="number" step="0.01" required></div>
+      <div class="field"><label>Functional Assessment</label><input name="FunctionalAssessment" type="number" step="0.01" required></div>
+      <div class="field"><label>Memory Complaints</label><input name="MemoryComplaints" type="number" step="1" required></div>
+      <div class="field"><label>Behavioral Problems</label><input name="BehavioralProblems" type="number" step="1" required></div>
+      <div class="field"><label>ADL</label><input name="ADL" type="number" step="0.01" required></div>
+      <div class="field"><label>Confusion</label><input name="Confusion" type="number" step="1" required></div>
+      <div class="field"><label>Disorientation</label><input name="Disorientation" type="number" step="1" required></div>
+      <div class="field"><label>Personality Changes</label><input name="PersonalityChanges" type="number" step="1" required></div>
+      <div class="field"><label>Difficulty Completing Tasks</label><input name="DifficultyCompletingTasks" type="number" step="1" required></div>
+      <div class="field"><label>Forgetfulness</label><input name="Forgetfulness" type="number" step="1" required></div>
+
+      <div class="actions">
+        <button type="submit">Predict</button>
+      </div>
+    </form>
+  </div>
+</body>
+</html>
