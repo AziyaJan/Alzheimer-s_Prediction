@@ -1,89 +1,743 @@
-<!-- templates/input.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Enter Inputs</title>
-  <link rel="stylesheet" href="/static/style.css" />
+  <title>Clinical Assessment - Alzheimer's Risk Prediction</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 80%, rgba(255,255,255,0.08) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 24px;
+      padding: 60px 50px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      position: relative;
+      z-index: 1;
+      animation: slideUp 0.8s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 50px;
+      padding-bottom: 30px;
+      border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+    }
+
+    h1 {
+      color: #2d3748;
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .muted {
+      color: #718096;
+      font-size: 1.1rem;
+      background: rgba(102, 126, 234, 0.1);
+      padding: 12px 24px;
+      border-radius: 50px;
+      display: inline-block;
+      border: 1px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(102, 126, 234, 0.1);
+      border-radius: 3px;
+      margin: 30px 0;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      width: 0%;
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+
+    .section-title {
+      color: #4a5568;
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin: 40px 0 24px 0;
+      padding: 16px 20px;
+      background: rgba(102, 126, 234, 0.08);
+      border-radius: 12px;
+      border-left: 4px solid #667eea;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-icon {
+      margin-right: 12px;
+      width: 24px;
+      height: 24px;
+      background: rgba(102, 126, 234, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .field {
+      position: relative;
+      animation: fadeInUp 0.6s ease-out;
+      animation-fill-mode: both;
+    }
+
+    .field:nth-child(n) {
+      animation-delay: calc(0.05s * var(--index));
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    label {
+      display: block;
+      color: #4a5568;
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+      transition: color 0.3s ease;
+    }
+
+    .field:focus-within label {
+      color: #667eea;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 16px 20px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 1rem;
+      background: white;
+      transition: all 0.3s ease;
+      color: #2d3748;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1), 0 4px 12px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
+    }
+
+    input:hover, select:hover {
+      border-color: #cbd5e0;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+      background-position: right 16px center;
+      background-repeat: no-repeat;
+      background-size: 16px;
+      padding-right: 48px;
+    }
+
+    .actions {
+      grid-column: 1 / -1;
+      text-align: center;
+      margin-top: 40px;
+      padding-top: 30px;
+      border-top: 2px solid rgba(102, 126, 234, 0.1);
+    }
+
+    button[type="submit"] {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      padding: 20px 60px;
+      border-radius: 16px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+      position: relative;
+      overflow: hidden;
+      min-width: 200px;
+    }
+
+    button[type="submit"]::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    button[type="submit"]:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+    }
+
+    button[type="submit"]:hover::before {
+      left: 100%;
+    }
+
+    button[type="submit"]:active {
+      transform: translateY(-1px);
+    }
+
+    button[type="submit"]:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .loading-spinner {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s linear infinite;
+      margin-right: 10px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .tooltip {
+      position: absolute;
+      top: -8px;
+      right: 8px;
+      width: 20px;
+      height: 20px;
+      background: rgba(102, 126, 234, 0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: help;
+      font-size: 12px;
+      color: #667eea;
+      font-weight: bold;
+    }
+
+    .tooltip:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 30px;
+      right: 0;
+      background: #2d3748;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: normal;
+      white-space: nowrap;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 40px 24px;
+        border-radius: 16px;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      button[type="submit"] {
+        padding: 16px 40px;
+        font-size: 1.1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 20px 10px;
+      }
+
+      .container {
+        padding: 30px 20px;
+      }
+
+      h1 {
+        font-size: 1.8rem;
+      }
+    }
+
+    /* Form validation styles */
+    input:invalid {
+      border-color: #e53e3e;
+    }
+
+    input:invalid:focus {
+      border-color: #e53e3e;
+      box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
+    }
+
+    .required::after {
+      content: ' *';
+      color: #e53e3e;
+    }
+
+    /* Accessibility improvements */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* Focus indicators for keyboard navigation */
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible {
+      outline: 2px solid #667eea;
+      outline-offset: 2px;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
-    <h1>Enter Clinical & Lifestyle Features</h1>
-    {% if user_name %}<p class="muted">User: {{ user_name }}</p>{% endif %}
+    <div class="header">
+      <h1>Clinical & Lifestyle Assessment</h1>
+      {% if user_name %}<p class="muted">👤 Welcome, {{ user_name }}</p>{% endif %}
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
 
-    <form action="/predict" method="post" class="grid">
-      <div class="field"><label>Age</label><input name="Age" type="number" step="1" required></div>
+    <form action="/predict" method="post" class="assessment-form" id="assessmentForm">
+      
+      <!-- Demographics Section -->
+      <div class="section-title">
+        <div class="section-icon">👤</div>
+        Demographics
+      </div>
+      <div class="grid">
+        <div class="field" style="--index: 1">
+          <label class="required">Age</label>
+          <input name="Age" type="number" step="1" min="18" max="120" required>
+          <div class="tooltip" data-tooltip="Age in years (18-120)">?</div>
+        </div>
 
-      <div class="field">
-        <label>Gender</label>
-        <select name="Gender" required>
-          <option value="0">Female (0)</option>
-          <option value="1">Male (1)</option>
-        </select>
+        <div class="field" style="--index: 2">
+          <label class="required">Gender</label>
+          <select name="Gender" required>
+            <option value="">Select Gender</option>
+            <option value="0">Female</option>
+            <option value="1">Male</option>
+          </select>
+        </div>
+
+        <div class="field" style="--index: 3">
+          <label class="required">Ethnicity</label>
+          <input name="Ethnicity" type="number" step="1" min="0" max="10" required>
+          <div class="tooltip" data-tooltip="Ethnicity code (0-10)">?</div>
+        </div>
+
+        <div class="field" style="--index: 4">
+          <label class="required">Education Level</label>
+          <input name="EducationLevel" type="number" step="1" min="0" max="20" required>
+          <div class="tooltip" data-tooltip="Years of education (0-20)">?</div>
+        </div>
       </div>
 
-      <div class="field"><label>Ethnicity</label><input name="Ethnicity" type="number" step="1" required></div>
-      <div class="field"><label>Education Level</label><input name="EducationLevel" type="number" step="1" required></div>
-      <div class="field"><label>BMI</label><input name="BMI" type="number" step="0.01" required></div>
+      <!-- Physical Health Section -->
+      <div class="section-title">
+        <div class="section-icon">💪</div>
+        Physical Health & Lifestyle
+      </div>
+      <div class="grid">
+        <div class="field" style="--index: 5">
+          <label class="required">BMI</label>
+          <input name="BMI" type="number" step="0.01" min="10" max="50" required>
+          <div class="tooltip" data-tooltip="Body Mass Index (10-50)">?</div>
+        </div>
 
-      <div class="field">
-        <label>Smoking</label>
-        <select name="Smoking" required>
-          <option value="0">No (0)</option>
-          <option value="1">Yes (1)</option>
-        </select>
+        <div class="field" style="--index: 6">
+          <label class="required">Smoking</label>
+          <select name="Smoking" required>
+            <option value="">Select Status</option>
+            <option value="0">Non-smoker</option>
+            <option value="1">Smoker</option>
+          </select>
+        </div>
+
+        <div class="field" style="--index: 7">
+          <label class="required">Alcohol Consumption</label>
+          <input name="AlcoholConsumption" type="number" step="0.01" min="0" max="20" required>
+          <div class="tooltip" data-tooltip="Units per week (0-20)">?</div>
+        </div>
+
+        <div class="field" style="--index: 8">
+          <label class="required">Physical Activity</label>
+          <input name="PhysicalActivity" type="number" step="0.01" min="0" max="10" required>
+          <div class="tooltip" data-tooltip="Activity level (0-10)">?</div>
+        </div>
+
+        <div class="field" style="--index: 9">
+          <label class="required">Diet Quality</label>
+          <input name="DietQuality" type="number" step="0.01" min="0" max="10" required>
+          <div class="tooltip" data-tooltip="Diet quality score (0-10)">?</div>
+        </div>
+
+        <div class="field" style="--index: 10">
+          <label class="required">Sleep Quality</label>
+          <input name="SleepQuality" type="number" step="0.01" min="0" max="10" required>
+          <div class="tooltip" data-tooltip="Sleep quality score (0-10)">?</div>
+        </div>
       </div>
 
-      <div class="field"><label>Alcohol Consumption</label><input name="AlcoholConsumption" type="number" step="0.01" required></div>
-      <div class="field"><label>Physical Activity</label><input name="PhysicalActivity" type="number" step="0.01" required></div>
-      <div class="field"><label>Diet Quality</label><input name="DietQuality" type="number" step="0.01" required></div>
-      <div class="field"><label>Sleep Quality</label><input name="SleepQuality" type="number" step="0.01" required></div>
+      <!-- Medical History Section -->
+      <div class="section-title">
+        <div class="section-icon">🏥</div>
+        Medical History
+      </div>
+      <div class="grid">
+        <div class="field" style="--index: 11">
+          <label class="required">Family History of Alzheimer's</label>
+          <select name="FamilyHistoryAlzheimers" required>
+            <option value="">Select</option>
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+          </select>
+        </div>
 
-      <div class="field"><label>Family History of Alzheimer’s</label><input name="FamilyHistoryAlzheimers" type="number" step="1" required></div>
-      <div class="field"><label>Cardiovascular Disease</label><input name="CardiovascularDisease" type="number" step="1" required></div>
+        <div class="field" style="--index: 12">
+          <label class="required">Cardiovascular Disease</label>
+          <select name="CardiovascularDisease" required>
+            <option value="">Select</option>
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+          </select>
+        </div>
 
-      <div class="field">
-        <label>Diabetes</label>
-        <select name="Diabetes" required>
-          <option value="0">No (0)</option>
-          <option value="1">Yes (1)</option>
-        </select>
+        <div class="field" style="--index: 13">
+          <label class="required">Diabetes</label>
+          <select name="Diabetes" required>
+            <option value="">Select</option>
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+          </select>
+        </div>
+
+        <div class="field" style="--index: 14">
+          <label class="required">Depression</label>
+          <select name="Depression" required>
+            <option value="">Select</option>
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+          </select>
+        </div>
+
+        <div class="field" style="--index: 15">
+          <label class="required">Head Injury</label>
+          <select name="HeadInjury" required>
+            <option value="">Select</option>
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+          </select>
+        </div>
+
+        <div class="field" style="--index: 16">
+          <label class="required">Hypertension</label>
+          <select name="Hypertension" required>
+            <option value="">Select</option>
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+          </select>
+        </div>
       </div>
 
-      <div class="field">
-        <label>Depression</label>
-        <select name="Depression" required>
-          <option value="0">No (0)</option>
-          <option value="1">Yes (1)</option>
-        </select>
+      <!-- Vital Signs Section -->
+      <div class="section-title">
+        <div class="section-icon">📊</div>
+        Vital Signs & Lab Results
+      </div>
+      <div class="grid">
+        <div class="field" style="--index: 17">
+          <label class="required">Systolic BP</label>
+          <input name="SystolicBP" type="number" step="1" min="80" max="200" required>
+          <div class="tooltip" data-tooltip="Systolic blood pressure (mmHg)">?</div>
+        </div>
+
+        <div class="field" style="--index: 18">
+          <label class="required">Diastolic BP</label>
+          <input name="DiastolicBP" type="number" step="1" min="40" max="120" required>
+          <div class="tooltip" data-tooltip="Diastolic blood pressure (mmHg)">?</div>
+        </div>
+
+        <div class="field" style="--index: 19">
+          <label class="required">Total Cholesterol</label>
+          <input name="CholesterolTotal" type="number" step="0.01" min="100" max="400" required>
+          <div class="tooltip" data-tooltip="Total cholesterol (mg/dL)">?</div>
+        </div>
+
+        <div class="field" style="--index: 20">
+          <label class="required">LDL Cholesterol</label>
+          <input name="CholesterolLDL" type="number" step="0.01" min="50" max="250" required>
+          <div class="tooltip" data-tooltip="LDL cholesterol (mg/dL)">?</div>
+        </div>
+
+        <div class="field" style="--index: 21">
+          <label class="required">HDL Cholesterol</label>
+          <input name="CholesterolHDL" type="number" step="0.01" min="20" max="100" required>
+          <div class="tooltip" data-tooltip="HDL cholesterol (mg/dL)">?</div>
+        </div>
+
+        <div class="field" style="--index: 22">
+          <label class="required">Triglycerides</label>
+          <input name="CholesterolTriglycerides" type="number" step="0.01" min="50" max="500" required>
+          <div class="tooltip" data-tooltip="Triglycerides (mg/dL)">?</div>
+        </div>
       </div>
 
-      <div class="field"><label>Head Injury</label><input name="HeadInjury" type="number" step="1" required></div>
-      <div class="field"><label>Hypertension</label><input name="Hypertension" type="number" step="1" required></div>
-      <div class="field"><label>Systolic BP</label><input name="SystolicBP" type="number" step="1" required></div>
-      <div class="field"><label>Diastolic BP</label><input name="DiastolicBP" type="number" step="1" required></div>
+      <!-- Cognitive Assessment Section -->
+      <div class="section-title">
+        <div class="section-icon">🧠</div>
+        Cognitive Assessment
+      </div>
+      <div class="grid">
+        <div class="field" style="--index: 23">
+          <label class="required">MMSE</label>
+          <input name="MMSE" type="number" step="0.01" min="0" max="30" required>
+          <div class="tooltip" data-tooltip="Mini-Mental State Exam score (0-30)">?</div>
+        </div>
 
-      <div class="field"><label>Total Cholesterol</label><input name="CholesterolTotal" type="number" step="0.01" required></div>
-      <div class="field"><label>LDL Cholesterol</label><input name="CholesterolLDL" type="number" step="0.01" required></div>
-      <div class="field"><label>HDL Cholesterol</label><input name="CholesterolHDL" type="number" step="0.01" required></div>
-      <div class="field"><label>Triglycerides</label><input name="CholesterolTriglycerides" type="number" step="0.01" required></div>
+        <div class="field" style="--index: 24">
+          <label class="required">Functional Assessment</label>
+          <input name="FunctionalAssessment" type="number" step="0.01" min="0" max="10" required>
+          <div class="tooltip" data-tooltip="Functional assessment score (0-10)">?</div>
+        </div>
 
-      <div class="field"><label>MMSE</label><input name="MMSE" type="number" step="0.01" required></div>
-      <div class="field"><label>Functional Assessment</label><input name="FunctionalAssessment" type="number" step="0.01" required></div>
-      <div class="field"><label>Memory Complaints</label><input name="MemoryComplaints" type="number" step="1" required></div>
-      <div class="field"><label>Behavioral Problems</label><input name="BehavioralProblems" type="number" step="1" required></div>
-      <div class="field"><label>ADL</label><input name="ADL" type="number" step="0.01" required></div>
-      <div class="field"><label>Confusion</label><input name="Confusion" type="number" step="1" required></div>
-      <div class="field"><label>Disorientation</label><input name="Disorientation" type="number" step="1" required></div>
-      <div class="field"><label>Personality Changes</label><input name="PersonalityChanges" type="number" step="1" required></div>
-      <div class="field"><label>Difficulty Completing Tasks</label><input name="DifficultyCompletingTasks" type="number" step="1" required></div>
-      <div class="field"><label>Forgetfulness</label><input name="Forgetfulness" type="number" step="1" required></div>
+        <div class="field" style="--index: 25">
+          <label class="required">Memory Complaints</label>
+          <select name="MemoryComplaints" required>
+            <option value="">Select</option>
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+          </select>
+        </div>
+
+        <div class="field" style="--index: 26">
+          <label class="required">Behavioral Problems</label>
+          <select name="BehavioralProblems" required>
+            <option value="">Select</option>
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+          </select>
+        </div>
+
+        <div class="field" style="--index: 27">
+          <label class="required">ADL</label>
+          <input name="ADL" type="number" step="0.01" min="0" max="10" required>
+          <div class="tooltip" data-tooltip="Activities of Daily Living score (0-10)">?</div>
+        </div>
+
+        <div class="field" style="--index: 28">
+          <label class="required">Confusion</label>
+          <select name="Confusion" required>
+            <option value="">Select</option>
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+          </select>
+        </div>
+
+        <div class="field" style="--index: 29">
+          <label class="required">Disorientation</label>
+          <select name="Disorientation" required>
+            <option value="">Select</option>
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+          </select>
+        </div>
+
+        <div class="field" style="--index: 30">
+          <label class="required">Personality Changes</label>
+          <select name="PersonalityChanges" required>
+            <option value="">Select</option>
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+          </select>
+        </div>
+
+        <div class="field" style="--index: 31">
+          <label class="required">Difficulty Completing Tasks</label>
+          <select name="DifficultyCompletingTasks" required>
+            <option value="">Select</option>
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+          </select>
+        </div>
+
+        <div class="field" style="--index: 32">
+          <label class="required">Forgetfulness</label>
+          <select name="Forgetfulness" required>
+            <option value="">Select</option>
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+          </select>
+        </div>
+      </div>
 
       <div class="actions">
-        <button type="submit">Predict</button>
+        <button type="submit" id="submitBtn">
+          <div class="loading-spinner" id="loadingSpinner"></div>
+          <span id="btnText">Generate Risk Assessment</span>
+        </button>
       </div>
     </form>
   </div>
+
+  <script>
+    // Progress tracking
+    const form = document.getElementById('assessmentForm');
+    const progressFill = document.getElementById('progressFill');
+    const inputs = form.querySelectorAll('input[required], select[required]');
+    const totalInputs = inputs.length;
+
+    function updateProgress() {
+      let filledInputs = 0;
+      inputs.forEach(input => {
+        if (input.value.trim() !== '') {
+          filledInputs++;
+        }
+      });
+      const progress = (filledInputs / totalInputs) * 100;
+      progressFill.style.width = progress + '%';
+    }
+
+    inputs.forEach(input => {
+      input.addEventListener('input', updateProgress);
+      input.addEventListener('change', updateProgress);
+    });
+
+    // Form submission handling
+    form.addEventListener('submit', function(e) {
+      const submitBtn = document.getElementById('submitBtn');
+      const loadingSpinner = document.getElementById('loadingSpinner');
+      const btnText = document.getElementById('btnText');
+      
+      submitBtn.disabled = true;
+      loadingSpinner.style.display = 'inline-block';
+      btnText.textContent = 'Processing...';
+    });
+
+    // Initialize progress
+    updateProgress();
+
+    // Smooth scroll to first empty field on validation error
+    form.addEventListener('invalid', function(e) {
+      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, true);
+
+    // Auto-save functionality (optional - stores in sessionStorage)
+    function saveFormData() {
+      const formData = new FormData(form);
+      const data = {};
+      for (let [key, value] of formData.entries()) {
+        data[key] = value;
+      }
+      sessionStorage.setItem('alzheimers_assessment', JSON.stringify(data));
+    }
+
+    function loadFormData() {
+      const saved = sessionStorage.getItem('alzheimers_assessment');
+      if (saved) {
+        const data = JSON.parse(saved);
+        Object.keys(data).forEach(key => {
+          const input = form.querySelector(`[name="${key}"]`);
+          if (input) {
+            input.value = data[key];
+          }
+        });
+        updateProgress();
+      }
+    }
+
+    // Save form data on input change
+    inputs.forEach(input => {
+      input.addEventListener('change', saveFormData);
+    });
+
+    // Load saved data on page load
+    loadFormData();
+  </script>
 </body>
 </html>
