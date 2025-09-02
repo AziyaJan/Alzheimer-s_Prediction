@@ -1,28 +1,651 @@
-<!-- templates/output.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Prediction Result</title>
-  <link rel="stylesheet" href="/static/style.css" />
+  <title>Risk Assessment Results - Alzheimer's Prediction</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 70%, rgba(255,255,255,0.08) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+      animation: float 20s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-15px) rotate(180deg); }
+    }
+
+    .container {
+      max-width: 800px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 24px;
+      padding: 60px 50px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      position: relative;
+      z-index: 1;
+      animation: slideUp 0.8s ease-out;
+      text-align: center;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .header {
+      margin-bottom: 40px;
+      animation: fadeIn 1s ease-out 0.3s both;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-icon {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: scaleIn 0.6s ease-out 0.5s both;
+      position: relative;
+    }
+
+    .result-icon.success {
+      background: linear-gradient(135deg, #48bb78, #38a169);
+      box-shadow: 0 15px 30px rgba(72, 187, 120, 0.3);
+    }
+
+    .result-icon.error {
+      background: linear-gradient(135deg, #f56565, #e53e3e);
+      box-shadow: 0 15px 30px rgba(245, 101, 101, 0.3);
+    }
+
+    .result-icon.warning {
+      background: linear-gradient(135deg, #ed8936, #dd6b20);
+      box-shadow: 0 15px 30px rgba(237, 137, 54, 0.3);
+    }
+
+    .result-icon.high-risk {
+      background: linear-gradient(135deg, #e53e3e, #c53030);
+      box-shadow: 0 15px 30px rgba(229, 62, 62, 0.4);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes scaleIn {
+      from { transform: scale(0); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 15px 30px rgba(229, 62, 62, 0.4); }
+      50% { transform: scale(1.05); box-shadow: 0 20px 40px rgba(229, 62, 62, 0.5); }
+    }
+
+    .result-icon svg {
+      width: 50px;
+      height: 50px;
+      stroke: white;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    h1 {
+      color: #2d3748;
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      color: #718096;
+      font-size: 1.2rem;
+      margin-bottom: 40px;
+    }
+
+    .alert {
+      padding: 32px 40px;
+      border-radius: 20px;
+      margin: 32px 0;
+      position: relative;
+      overflow: hidden;
+      animation: slideIn 0.8s ease-out 0.7s both;
+      border: 2px solid;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-30px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .alert::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+      animation: shine 3s ease-in-out infinite;
+    }
+
+    @keyframes shine {
+      0% { transform: translateX(-100%); }
+      50% { transform: translateX(100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .alert.success {
+      background: linear-gradient(135deg, rgba(72, 187, 120, 0.1), rgba(56, 161, 105, 0.15));
+      border-color: #48bb78;
+      color: #2f855a;
+    }
+
+    .alert.error {
+      background: linear-gradient(135deg, rgba(245, 101, 101, 0.1), rgba(229, 62, 62, 0.15));
+      border-color: #f56565;
+      color: #c53030;
+    }
+
+    .alert.warning {
+      background: linear-gradient(135deg, rgba(237, 137, 54, 0.1), rgba(221, 107, 32, 0.15));
+      border-color: #ed8936;
+      color: #c05621;
+    }
+
+    .alert.high-risk {
+      background: linear-gradient(135deg, rgba(229, 62, 62, 0.15), rgba(197, 48, 48, 0.2));
+      border-color: #e53e3e;
+      color: #742a2a;
+      border-width: 3px;
+    }
+
+    .alert p {
+      font-size: 1.2rem;
+      line-height: 1.6;
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .alert p:last-child {
+      margin-bottom: 0;
+    }
+
+    .alert strong {
+      font-weight: 700;
+    }
+
+    .result-details {
+      background: rgba(102, 126, 234, 0.05);
+      border: 2px solid rgba(102, 126, 234, 0.1);
+      border-radius: 16px;
+      padding: 24px;
+      margin: 24px 0;
+      animation: fadeIn 1s ease-out 1s both;
+    }
+
+    .risk-level {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+    }
+
+    .risk-level.low {
+      background: rgba(72, 187, 120, 0.2);
+      color: #2f855a;
+    }
+
+    .risk-level.medium {
+      background: rgba(237, 137, 54, 0.2);
+      color: #c05621;
+    }
+
+    .risk-level.high {
+      background: rgba(229, 62, 62, 0.2);
+      color: #c53030;
+    }
+
+    .actions {
+      margin-top: 50px;
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeIn 1s ease-out 1.2s both;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 16px 32px;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      border: 2px solid transparent;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-secondary {
+      background: rgba(102, 126, 234, 0.1);
+      color: #667eea;
+      border-color: rgba(102, 126, 234, 0.3);
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(102, 126, 234, 0.15);
+      border-color: rgba(102, 126, 234, 0.5);
+    }
+
+    .btn:hover::before {
+      left: 100%;
+    }
+
+    .btn-icon {
+      margin-right: 8px;
+      width: 20px;
+      height: 20px;
+    }
+
+    .recommendations {
+      background: rgba(72, 187, 120, 0.05);
+      border: 2px solid rgba(72, 187, 120, 0.2);
+      border-radius: 16px;
+      padding: 32px;
+      margin: 32px 0;
+      text-align: left;
+      animation: fadeIn 1s ease-out 1.4s both;
+    }
+
+    .recommendations h3 {
+      color: #2f855a;
+      font-size: 1.4rem;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+    }
+
+    .recommendations h3::before {
+      content: '💡';
+      margin-right: 8px;
+    }
+
+    .recommendations ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .recommendations li {
+      padding: 8px 0;
+      color: #4a5568;
+      position: relative;
+      padding-left: 24px;
+    }
+
+    .recommendations li::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: #48bb78;
+      font-weight: bold;
+    }
+
+    .disclaimer {
+      background: rgba(237, 137, 54, 0.05);
+      border: 1px solid rgba(237, 137, 54, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 32px;
+      color: #744210;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      animation: fadeIn 1s ease-out 1.6s both;
+    }
+
+    .disclaimer strong {
+      color: #c05621;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 40px 24px;
+        border-radius: 16px;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      .result-icon {
+        width: 80px;
+        height: 80px;
+      }
+
+      .result-icon svg {
+        width: 40px;
+        height: 40px;
+      }
+
+      .alert {
+        padding: 24px 20px;
+      }
+
+      .actions {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .btn {
+        width: 100%;
+        max-width: 300px;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 20px 10px;
+      }
+
+      .container {
+        padding: 30px 20px;
+      }
+
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      .alert p {
+        font-size: 1.1rem;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="container">
-    <h1>Prediction Result</h1>
+    <div class="header">
+      {% if is_error %}
+        <div class="result-icon error">
+          <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
+        </div>
+        <h1>Assessment Error</h1>
+        <p class="subtitle">We encountered an issue processing your assessment</p>
+      {% else %}
+        <!-- Determine risk level and icon based on prediction_text -->
+        {% set risk_level = "low" %}
+        {% set icon_type = "success" %}
+        
+        {% if "high risk" in prediction_text.lower() or "elevated risk" in prediction_text.lower() %}
+          {% set risk_level = "high" %}
+          {% set icon_type = "high-risk" %}
+        {% elif "moderate risk" in prediction_text.lower() or "medium risk" in prediction_text.lower() %}
+          {% set risk_level = "medium" %}
+          {% set icon_type = "warning" %}
+        {% endif %}
+
+        <div class="result-icon {{ icon_type }}">
+          {% if icon_type == "success" %}
+            <svg viewBox="0 0 24 24">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22,4 12,14.01 9,11.01"/>
+            </svg>
+          {% elif icon_type == "warning" %}
+            <svg viewBox="0 0 24 24">
+              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+              <path d="M12 9v4"/>
+              <path d="m12 17 .01 0"/>
+            </svg>
+          {% else %}
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 8v4"/>
+              <path d="m12 16 .01 0"/>
+            </svg>
+          {% endif %}
+        </div>
+        
+        <h1>Assessment Complete</h1>
+        <p class="subtitle">Your Alzheimer's risk assessment results are ready</p>
+        
+        <div class="risk-level {{ risk_level }}">
+          {{ risk_level|title }} Risk Level
+        </div>
+      {% endif %}
+    </div>
 
     {% if is_error %}
       <div class="alert error">
-        <p><strong>Error:</strong> {{ prediction_text }}</p>
-        <p>{{ details }}</p>
+        <p><strong>⚠️ Processing Error:</strong></p>
+        <p>{{ prediction_text }}</p>
+        {% if details %}
+          <p><strong>Technical Details:</strong> {{ details }}</p>
+        {% endif %}
       </div>
-      <a href="/input" class="btn">Go back</a>
+
+      <div class="result-details">
+        <h3 style="color: #c53030; margin-bottom: 16px;">What happened?</h3>
+        <p style="color: #4a5568; line-height: 1.6;">
+          There was an issue processing your assessment data. This could be due to:
+        </p>
+        <ul style="color: #4a5568; margin: 16px 0; padding-left: 20px;">
+          <li>Invalid or missing input values</li>
+          <li>Temporary system unavailability</li>
+          <li>Network connectivity issues</li>
+        </ul>
+        <p style="color: #4a5568; line-height: 1.6;">
+          Please check your input data and try again. If the problem persists, contact our support team.
+        </p>
+      </div>
+
+      <div class="actions">
+        <a href="/input" class="btn btn-primary">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M19 12H6m6 6l-6-6 6-6"/>
+          </svg>
+          Try Again
+        </a>
+        <a href="/" class="btn btn-secondary">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9,22 9,12 15,12 15,22"/>
+          </svg>
+          Start Over
+        </a>
+      </div>
+
     {% else %}
-      <div class="alert success">
+      <div class="alert {{ 'high-risk' if 'high risk' in prediction_text.lower() else ('warning' if 'moderate risk' in prediction_text.lower() or 'medium risk' in prediction_text.lower() else 'success') }}">
         <p>{{ prediction_text }}</p>
       </div>
-      <a href="/input" class="btn">Make another prediction</a>
+
+      <div class="result-details">
+        <h3 style="color: #4a5568; margin-bottom: 16px;">Understanding Your Results</h3>
+        <p style="color: #4a5568; line-height: 1.6;">
+          This assessment uses advanced machine learning algorithms to analyze multiple risk factors 
+          including your demographics, lifestyle, medical history, and cognitive indicators to 
+          provide a comprehensive risk evaluation.
+        </p>
+      </div>
+
+      {% if "low risk" in prediction_text.lower() %}
+        <div class="recommendations">
+          <h3>Recommended Actions</h3>
+          <ul>
+            <li>Continue maintaining a healthy lifestyle with regular exercise</li>
+            <li>Keep up with a balanced, Mediterranean-style diet</li>
+            <li>Engage in mentally stimulating activities and social connections</li>
+            <li>Schedule regular health check-ups with your healthcare provider</li>
+            <li>Monitor and manage cardiovascular health factors</li>
+          </ul>
+        </div>
+      {% elif "moderate risk" in prediction_text.lower() or "medium risk" in prediction_text.lower() %}
+        <div class="recommendations">
+          <h3>Recommended Actions</h3>
+          <ul>
+            <li>Consult with your healthcare provider about your risk factors</li>
+            <li>Consider cognitive screening and monitoring</li>
+            <li>Implement lifestyle modifications (diet, exercise, sleep)</li>
+            <li>Manage cardiovascular and metabolic health conditions</li>
+            <li>Stay mentally and socially active</li>
+            <li>Consider joining brain health programs or support groups</li>
+          </ul>
+        </div>
+      {% else %}
+        <div class="recommendations">
+          <h3>Immediate Recommendations</h3>
+          <ul>
+            <li>Schedule an appointment with a neurologist or geriatrician</li>
+            <li>Discuss comprehensive cognitive testing and monitoring</li>
+            <li>Review and optimize management of existing health conditions</li>
+            <li>Consider consulting with a dementia specialist</li>
+            <li>Explore early intervention strategies and clinical trials</li>
+            <li>Connect with support resources for patients and families</li>
+          </ul>
+        </div>
+      {% endif %}
+
+      <div class="actions">
+        <a href="/input" class="btn btn-primary">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+          New Assessment
+        </a>
+        <a href="/" class="btn btn-secondary">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9,22 9,12 15,12 15,22"/>
+          </svg>
+          Home
+        </a>
+      </div>
     {% endif %}
+
+    <div class="disclaimer">
+      <strong>Medical Disclaimer:</strong> This assessment is for informational purposes only and 
+      should not be considered a substitute for professional medical advice, diagnosis, or treatment. 
+      Always seek the advice of your physician or other qualified healthcare provider with any 
+      questions you may have regarding a medical condition. Never disregard professional medical 
+      advice or delay seeking it because of something you have read in this assessment.
+    </div>
   </div>
+
+  <script>
+    // Add some interactive elements for better user experience
+    document.addEventListener('DOMContentLoaded', function() {
+      // Animate the result icon
+      const resultIcon = document.querySelector('.result-icon');
+      if (resultIcon) {
+        setTimeout(() => {
+          resultIcon.style.transform = 'scale(1.1)';
+          setTimeout(() => {
+            resultIcon.style.transform = 'scale(1)';
+          }, 200);
+        }, 800);
+      }
+
+      // Add click tracking for buttons (for analytics if needed)
+      const buttons = document.querySelectorAll('.btn');
+      buttons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          // Add loading state
+          this.style.opacity = '0.8';
+          this.style.transform = 'translateY(0)';
+        });
+      });
+
+      // Auto-scroll to results if page is long
+      const container = document.querySelector('.container');
+      if (container && window.innerHeight < container.offsetHeight) {
+        setTimeout(() => {
+          container.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+        }, 1000);
+      }
+    });
+  </script>
 </body>
 </html>
